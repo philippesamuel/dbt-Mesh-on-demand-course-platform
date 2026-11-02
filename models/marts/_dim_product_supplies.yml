@@ -1,0 +1,39 @@
+models:
+  - name: dim_product_supplies
+    description: >-
+      A unified dimension table combining product SKU characteristics with their corresponding supply
+      costs. Derived from core platform staging models, this model provides a centralized view of store
+      items—including identifiers, classifications, pricing, and food/drink flags—alongside associated
+      supply costs for downstream analytics and reporting.
+    columns:
+      - name: product_id
+        description: Unique identifier for each product or SKU sold in stores.
+        data_type: varchar
+      - name: product_name
+        description: >-
+          The descriptive name or display label for each product/SKU sold in stores, used for identification
+          and downstream reporting.
+        data_type: varchar
+      - name: product_type
+        description: >-
+          Represents the classification or category of the product. Used to segment store items for downstream
+          analytics and supply cost reporting.
+        data_type: varchar
+      - name: product_description
+        description: Human-readable description of the product or SKU sold in stores.
+        data_type: varchar
+      - name: product_price
+        description: The retail price associated with each product SKU.
+        data_type: number
+      - name: is_food_item
+        description: Boolean flag indicating whether the product is classified as a food item.
+        data_type: boolean
+      - name: is_drink_item
+        description: >-
+          Boolean flag indicating whether the product or supply item is classified as a drink item.
+        data_type: boolean
+      - name: supply_cost
+        description: >-
+          The monetary cost associated with supplying each product or SKU. Represents the base expense
+          used for margin and profitability analysis in downstream reporting.
+        data_type: number
