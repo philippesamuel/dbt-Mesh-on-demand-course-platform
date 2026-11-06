@@ -1,0 +1,48 @@
+models:
+  - name: int_orders
+
+    description: >-
+      This intermediate model curates and standardizes core platform order data. Each row represents a
+      single order, capturing unique identifiers, customer details, order dates, lifecycle statuses, payment
+      information, and finalized monetary amounts to support downstream analytics and reporting.
+    columns:
+      - name: order_id
+        description: Unique identifier for each order.
+        data_type: varchar
+      - name: location_id
+        description: >-
+          Unique identifier for each store location, sourced from the core platform's Jaffle Shop stores.
+          Serves as the primary key for linking location-specific data across downstream analytics and
+          reporting.
+        data_type: varchar
+      - name: customer_id
+        description: >-
+          Unique identifier for each customer record, mapped from the source system's id field for downstream
+          analytics consumption.
+        data_type: varchar
+      - name: order_total
+        description: Total monetary value of the order (subtotal plus tax), in cents.
+        data_type: number
+      - name: tax_paid
+        description: Total tax amount paid for this order, in cents.
+        data_type: number
+      - name: ordered_at
+        description: Timestamp indicating when the order was originally placed.
+        data_type: timestamp_ntz
+      - name: customer_name
+        description: The full name of the customer associated with this order.
+        data_type: varchar
+      - name: location_name
+        description: >-
+          Human-readable name of the store or location associated with the order, sourced from core platform
+          location records.
+        data_type: varchar
+      - name: tax_rate
+        description: >-
+          Applicable sales tax rate for the store, as a decimal fraction (for example 0.06 for 6%). Used
+          for transactional tax calculations and location-based reporting.
+        data_type: float
+      - name: location_opened_at
+        description: Timestamp indicating when the store location associated with this order was 
+          opened.
+        data_type: timestamp_ntz

@@ -32,6 +32,7 @@ vars:
 
 models:
   core_platform:
+    +static_analysis: strict
     staging:
       +materialized: view
     marts:

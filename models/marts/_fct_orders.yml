@@ -1,6 +1,9 @@
 models:
   - name: fct_orders
+    latest_version: 1
     config:
+      access: public
+      group: finance
       contract:
         enforced: true
     description: >-
@@ -61,3 +64,15 @@ models:
       - name: ordered_day
         data_type: integer
         description: Day of the month (1-31) of `ordered_at`.
+    versions:
+      - v: 1
+        config:
+          alias: fct_orders
+      - v: 2
+        columns:
+          - name: order_amount
+            data_type: number
+          - name: location_opened_at
+            data_type: date
+          - include: all
+            exclude: [order_total]
