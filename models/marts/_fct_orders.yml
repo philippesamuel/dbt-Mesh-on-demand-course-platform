@@ -1,0 +1,78 @@
+models:
+  - name: fct_orders
+    latest_version: 1
+    config:
+      access: public
+      group: finance
+      contract:
+        enforced: true
+    description: >-
+      Order fact table with one row per order. Enriches each order with customer and store (location)
+      attributes and calendar parts of the order date (year, month, day). Monetary amounts are in
+      currency units (staging converts the raw cents to decimals). Intended as the primary source for
+      order, revenue and tax analytics.
+    columns:
+      - name: order_id
+        data_type: varchar
+        description: Unique identifier for each order. Primary key of this table.
+        constraints:
+          - type: primary_key
+          - type: not_null
+        tests:
+          - unique
+          - not_null
+      - name: location_id
+        data_type: varchar
+        description: >-
+          Identifier of the store location where the order was placed. Foreign key to the locations
+          (stores) data.
+      - name: customer_id
+        data_type: varchar
+        description: >-
+          Identifier of the customer who placed the order. Foreign key to the customers data.
+      - name: order_total
+        data_type: number
+        description: >-
+          Total monetary value of the order (subtotal plus tax), in currency units.
+      - name: tax_paid
+        data_type: number
+        description: Tax amount paid on the order, in currency units. Included in `order_total`.
+      - name: ordered_at
+        data_type: timestamp_ntz
+        description: >-
+          Date the order was placed, truncated to the day (time portion is always midnight).
+      - name: customer_name
+        data_type: varchar
+        description: Name of the customer who placed the order.
+      - name: location_name
+        data_type: varchar
+        description: Name of the store location where the order was placed.
+      - name: tax_rate
+        data_type: float
+        description: >-
+          Sales tax rate of the store, as a decimal fraction (for example 0.06 for 6%). Taken from the
+          location, not calculated from the order.
+      - name: location_opened_at
+        data_type: timestamp_ntz
+        description: Timestamp when the store location opened.
+      - name: ordered_year
+        data_type: integer
+        description: Calendar year of `ordered_at`, for example 2025.
+      - name: ordered_month
+        data_type: integer
+        description: Calendar month number (1-12) of `ordered_at`.
+      - name: ordered_day
+        data_type: integer
+        description: Day of the month (1-31) of `ordered_at`.
+    versions:
+      - v: 1
+        config:
+          alias: fct_orders
+      - v: 2
+        columns:
+          - name: order_amount
+            data_type: number
+          - name: location_opened_at
+            data_type: date
+          - include: all
+            exclude: [order_total]

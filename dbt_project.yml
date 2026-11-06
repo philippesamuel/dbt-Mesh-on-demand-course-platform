@@ -19,9 +19,20 @@ clean-targets:
 
 vars:
   truncate_timespan_to: "{{ current_timestamp() }}"
+  dbt-osmosis:
+    sources:
+      jaffle_shop: "staging/__sources.yml"
+    models:
+      staging: "_schema.yml"
+      marts: "_{model}.yml" 
+    yaml_settings:
+      preserve_quotes: true
+    use-unrendered-descriptions: true
+    output-to-lower: true 
 
 models:
   core_platform:
+    +static_analysis: strict
     staging:
       +materialized: view
     marts:

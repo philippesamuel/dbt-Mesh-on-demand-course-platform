@@ -1,0 +1,64 @@
+models:
+  - name: fct_order_items
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_item_id
+        data_type: varchar
+        constraints:
+          - type: primary_key
+          - type: not_null
+        description: >-
+          Unique identifier for each line item representing an individual product or service included
+          in a customer order.
+      - name: order_id
+        description: Unique identifier for each order.
+        data_type: varchar
+      - name: product_id
+        data_type: varchar
+        description: >-
+          Unique identifier for the specific product included in this order line item. Links to the corresponding
+          record in the product dimension table.
+      - name: location_id
+        description: >-
+          Unique identifier for each store location, sourced from the core platform's Jaffle Shop stores.
+          Serves as the primary key for linking location-specific data across downstream analytics and
+          reporting.
+        data_type: varchar
+      - name: customer_id
+        description: >-
+          Unique identifier for each customer record, mapped from the source system's id field for downstream
+          analytics consumption.
+        data_type: varchar
+      - name: order_total
+        description: Total monetary value of the order (subtotal plus tax), in currency units (dollars).
+        data_type: number(38,2)
+      - name: tax_paid
+        description: Total tax amount paid for this order, in currency units (dollars).
+        data_type: number(38,2)
+      - name: ordered_at
+        description: Timestamp indicating when the order was originally placed.
+        data_type: timestamp_ntz
+      - name: customer_name
+        data_type: varchar
+        description: The full name of the customer associated with this order line item.
+      - name: location_name
+        data_type: varchar
+        description: >-
+          The name of the location associated with this order line item, such as a warehouse or fulfillment
+          center. Enriched to standardize transaction data across operational sites for downstream sales
+          and fulfillment analytics.
+      - name: tax_rate
+        description: >-
+          Applicable sales tax rate for the store, as a decimal fraction (for example 0.06 for 6%). Used
+          for transactional tax calculations and location-based reporting.
+        data_type: float
+      - name: location_opened_at
+        data_type: timestamp_ntz
+        description: Timestamp indicating when the location associated with this order line item was
+          opened.
+    description: >-
+      Captures individual order line items enriched with customer and location details, monetary totals,
+      tax information, and timestamps. Serves as the foundational fact table for downstream sales, revenue,
+      and fulfillment analytics by standardizing e-commerce transaction data across locations and customers.

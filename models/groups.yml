@@ -1,0 +1,10 @@
+groups:
+    - name: finance
+      owner:
+        name: Warren Buffett
+        email: warren.buffet@example.com
+    - name: product
+      owner:
+        name: John Doe
+        email: john.doe@example.com
+        github: crazyjohn
