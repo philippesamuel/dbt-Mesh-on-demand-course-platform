@@ -7,13 +7,175 @@ sources:
     description: E-commerce data
     tables:
       - name: customers
+        identifier: raw_customers
         description: One record per person who has purchased one or more items
+        columns:
+          - name: id
+            description: Unique identifier for each customer record.
+            data_type: varchar
+            tests:
+              - unique
+              - not_null
+          - name: full_name
+            description: Customer's full name.
+            data_type: varchar
       - name: orders
+        identifier: raw_orders
         description: One record per order (consisting of one or more order items)
+        columns:
+          - name: id
+            description: Unique identifier for each order.
+            data_type: varchar
+            tests:
+              - unique
+              - not_null
+          - name: customer
+            description: >-
+              Identifier of the customer who placed this order. References `customers.id`
+              (stored as varchar in the source).
+            data_type: varchar
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('jaffle_shop', 'customers')
+                    field: id
+          - name: ordered_at
+            description: Timestamp indicating when the order was originally placed.
+            data_type: timestamp_ntz
+          - name: store_id
+            description: >-
+              Identifier of the store where the order was placed. References `stores.id`.
+            data_type: varchar
+            tests:
+              - relationships:
+                  arguments:
+                    to: source('jaffle_shop', 'stores')
+                    field: id
+          - name: subtotal
+            description: >-
+              Sum of line item amounts for the order before taxes and shipping fees, in cents.
+            data_type: number(38,0)
+          - name: tax_paid
+            description: Total tax amount paid for this order, in cents.
+            data_type: number(38,0)
+          - name: order_total
+            description: Total monetary value of the order (subtotal plus tax), in cents.
+            data_type: number(38,0)
+          - name: _etl_loaded_at
+            description: Timestamp indicating when the order record was loaded into the system.
+            data_type: timestamp_ntz
       - name: items
-        description: Items included in an order
+        identifier: raw_order_items
+        description: One record per item included in an order
+        columns:
+          - name: id
+            description: Unique identifier for each item included in an order.
+            data_type: varchar
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: >-
+              Identifier of the order containing this item. References `orders.id`.
+            data_type: varchar
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('jaffle_shop', 'orders')
+                    field: id
+          - name: sku
+            description: >-
+              Stock Keeping Unit (SKU) of the item included in the order. References `products.sku`.
+            data_type: varchar
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('jaffle_shop', 'products')
+                    field: sku
+          - name: _etl_loaded_at
+            description: Timestamp indicating when the record was ingested into the table by the ETL pipeline.
+            data_type: timestamp_ntz
       - name: stores
+        identifier: raw_stores
+        description: >-
+          Reference table containing store identifiers, names, opening dates, and applicable tax rates.
+          Provides location context for downstream reporting and transactional analysis.
+        columns:
+          - name: id
+            description: Unique identifier for each store reference record.
+            data_type: varchar
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: The official name of the retail location.
+            data_type: varchar
+          - name: opened_at
+            description: Date and time the store was originally opened.
+            data_type: timestamp_ntz
+          - name: tax_rate
+            description: >-
+              Applicable sales tax rate for the store, as a decimal fraction (for example 0.06 for 6%).
+              Used for transactional tax calculations and location-based reporting.
+            data_type: float
       - name: products
+        identifier: raw_products
         description: One record per SKU for items sold in stores
+        columns:
+          - name: sku
+            description: Unique Stock Keeping Unit (SKU) code identifying each product sold in stores.
+            data_type: varchar
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: The name or title of the product.
+            data_type: varchar
+          - name: type
+            description: Classification of the product, for example `jaffle` (food) or `beverage`.
+            data_type: varchar
+          - name: price
+            description: Price of the product SKU in cents.
+            data_type: number(38,0)
+          - name: description
+            description: Text description of the product.
+            data_type: varchar
       - name: supplies
-        description: One record per supply per SKU of items sold in stores
+        identifier: raw_supplies
+        description: >-
+          One record per supply per SKU of items sold in stores. A supply can be used by several SKUs,
+          so `id` alone is not unique; the grain is (`id`, `sku`).
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns:
+                  - id
+                  - sku
+        columns:
+          - name: id
+            description: Identifier of the supply. Repeats across SKUs that use the same supply.
+            data_type: varchar
+            tests:
+              - not_null
+          - name: name
+            description: The human-readable name of the supply item.
+            data_type: varchar
+          - name: cost
+            description: Cost of the supply item for the given SKU, in cents.
+            data_type: number(38,0)
+          - name: perishable
+            description: Indicates whether the supply item is perishable.
+            data_type: boolean
+          - name: sku
+            description: >-
+              Stock Keeping Unit of the product this supply is used for. References `products.sku`.
+            data_type: varchar
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('jaffle_shop', 'products')
+                    field: sku
